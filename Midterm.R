@@ -92,12 +92,15 @@ ggplot(data=data4)+
 
 #Make a new dataset so each row now represents a single sentence. It should still contain the polling
 #data you merged in before.
-data5<-mutate(data4,Sentence=tokenize_sentences(Text))
-
+data4<-mutate(data4,Sentence=tokenize_sentences(Text))
+data5<-separate_rows(data4, Text)
+data5<-data4%>%
+  unnest(Sentence = str_split(Text, "."))
 
 #For each sentence, make a variable that indicates whether or not it references economy/economic
 #growth/jobs.
 data5<-mutate(data4,Contain=(str_detect(Sentence,"economy")||str_detect(Sentence,"economic")||str_detect(Sentence,"growth")||str_detect(Sentence,"jobs")))
 #Now add back into the speech-level dataset a variable that indicates the proportion of sentences that
 #are about the economy.
+data4<-mutate(data4, Proportion=(numTrue/Total))
 
