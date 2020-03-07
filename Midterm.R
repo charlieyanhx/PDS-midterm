@@ -86,21 +86,23 @@ data4<-mutate(data4,Number.Adverbs=str_count(Text,"ly"))
 data4<-mutate(data4,Econ.Words=(str_count(Text,"economy")+str_count(Text,"economic")+str_count(Text,"jobs")+str_count(Text,"growth")))
 
 #Create a plot that shows the by-year relationship between NetApproval and mentions of jobs/economy.
-ggplot(data=data4)+
-  geom_point(mapping = aes(x=Year, y=NetAverage.Yearly/Econ.Words))
-#need more work
+ggplot(data=data4)+ 
+  geom_point(mapping = aes(x=Year, y=NetAverage.Yearly, color = "Net Approval"))+ #graph Net Approval vs year
+  geom_point(mapping = aes(x=Year, y=Econ.Words, color = "mentions of jobs/economy")) #graph Net Approval vs mentions
 
 #Make a new dataset so each row now represents a single sentence. It should still contain the polling
 #data you merged in before.
-data4<-mutate(data4,Sentence=tokenize_sentences(Text))
-data5<-separate_rows(data4, Text)
-data5<-data4%>%
-  unnest(Sentence = str_split(Text, "."))
+data5<-data4 %>% 
+  separate_rows(Text, sep = "[.]" , convert = FALSE)
 
 #For each sentence, make a variable that indicates whether or not it references economy/economic
 #growth/jobs.
-data5<-mutate(data4,Contain=(str_detect(Sentence,"economy")||str_detect(Sentence,"economic")||str_detect(Sentence,"growth")||str_detect(Sentence,"jobs")))
+data5<-mutate(data5,Contain=(str_detect(Text,"economy")||str_detect(Text,"economic")||str_detect(Text,"growth")||str_detect(Text,"jobs")))
+#using three logical operator between four str detect to determine whether the sentence references economy
+
 #Now add back into the speech-level dataset a variable that indicates the proportion of sentences that
 #are about the economy.
-data4<-mutate(data4, Proportion=(numTrue/Total))
+#code below is not working
+data5%>%group_by(Year)%>% #group by year first, and count how many sentences have true in Contain
+data4<-mutate(data4, Sentences=length(tokenize_sentences(Text))) #devide the amount above to the total sentence to receive the rate
 
