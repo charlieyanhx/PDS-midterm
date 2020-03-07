@@ -97,12 +97,14 @@ data5<-data4 %>%
 
 #For each sentence, make a variable that indicates whether or not it references economy/economic
 #growth/jobs.
-data5<-mutate(data5,Contain=(str_detect(Text,"economy")||str_detect(Text,"economic")||str_detect(Text,"growth")||str_detect(Text,"jobs")))
+data5<-mutate(data5,Contain=(str_detect(Text,"economy")|str_detect(Text,"economic")|str_detect(Text,"growth")|str_detect(Text,"jobs")))
 #using three logical operator between four str detect to determine whether the sentence references economy
 
 #Now add back into the speech-level dataset a variable that indicates the proportion of sentences that
 #are about the economy.
-#code below is not working
-data5%>%group_by(Year)%>% #group by year first, and count how many sentences have true in Contain
-data4<-mutate(data4, Sentences=length(tokenize_sentences(Text))) #devide the amount above to the total sentence to receive the rate
-
+data6<-data5%>%group_by(Year)%>%tally(Contain==TRUE) #group by year first, and count how many sentences have true in Contain
+data7<-data5%>%group_by(Year)%>%tally()#group to find total sentence
+data6<-data6%>%inner_join(data7,by="Year") #join data
+data6<-mutate(data6,Proportion=n.x/n.y) #create proportion
+data6<-select(data6,c(Year,Proportion)) #delete useless column
+data4<-data4%>%inner_join(data6,by="Year")#add proportion to original data set
